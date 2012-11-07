@@ -1,0 +1,11 @@
+# DS STORE
+.DS_STORE
+
+# images
+*.jpg
+
+# audio files
+*.mp3
+*.wav
+*.flac
+*.m4a

@@ -1,4 +1,7 @@
 class MusicObject {
+  AudioPlayer song;
+  AudioMetaData meta;
+
   String artist;
   String title;
   String year;
@@ -7,18 +10,25 @@ class MusicObject {
   String finalImgLoc;
   String tempImgLoc;
   String songFile;
+  float trackLength;
   int roundAmt;
   float xPos, yPos;
 
+  boolean hasSong;
+
   PFont StagBook, StagBold, StagSans;
 
-  MusicObject() {
+  MusicObject(String s) {
+
+    song = minim.loadFile(s);
+    trackLength = song.getMetaData().length();
+
     StagBook = loadFont("StagBook.vlw");
     StagBold = loadFont("StagBold.vlw");
     StagSans = loadFont("StagSans.vlw");
 
     roundAmt = 20;
-    tempImgLoc = "./img/_na.jpg";
+    tempImgLoc = "img/_na.jpg";
   }
 
   void setArtist(String s) {
@@ -38,18 +48,20 @@ class MusicObject {
   }
 
   void setAlbumArt(String imgName) {
-    if (imgName.length() > 0) {
-      finalImgLoc = "./img/" + imgName;
-    }
-    else {
-      finalImgLoc = tempImgLoc;
-    }
+    if (imgName.length() > 0) finalImgLoc = "img/" + imgName;
+    else finalImgLoc = tempImgLoc;
     PImage tempImg = loadImage(finalImgLoc);
     albumArt = roundImageCorners(tempImg, roundAmt);
   }
-  
+
   void setSongFile(String s) {
-    songFile = s;
+    if (s.length() > 0) hasSong = true;
+    else hasSong = false;
+    songFile = "mp3/" + s;
+  }
+
+  void setTrackLength(float f) {
+    trackLength = f;
   }
 
   // =======================
@@ -73,14 +85,24 @@ class MusicObject {
   String getInfo() {
     return info;
   }
-  
+
   String getSongFile() {
-   return songFile; 
+    return songFile;
   }
 
   PImage displayAlbumArt() {
     return albumArt;
   }
+
+  boolean hasSong() {
+    return hasSong;
+  }
+
+
+  float getTrackLength() {
+    return trackLength;
+  }
+
 
   // =======================
 
@@ -130,5 +152,12 @@ class MusicObject {
     }
     return rounded;
   }
+
+  /*
+  void loadSong(String s) {
+   song = minim.loadFile(s);
+   trackLength = song.getMetaData().length();
+   }
+   */
 }
 
