@@ -1,0 +1,11 @@
+.DS_STORE
+
+screenshots/
+
+*.jpg
+*.png
+
+*.wav
+*.flac
+*.mp3
+*.m4a

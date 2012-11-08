@@ -1,4 +1,10 @@
 class MusicObject {
+
+  float OFFSET;
+
+  AudioPlayer song;
+  AudioMetaData meta;
+
   String artist;
   String title;
   String year;
@@ -7,18 +13,29 @@ class MusicObject {
   String finalImgLoc;
   String tempImgLoc;
   String songFile;
+  float trackLength;
+  float position;
+  float arcPosition;
   int roundAmt;
   float xPos, yPos;
+
+  boolean hasSong;
+  boolean isPlaying;
+
 
   PFont StagBook, StagBold, StagSans;
 
   MusicObject() {
+    OFFSET = radians(90);
+
     StagBook = loadFont("StagBook.vlw");
     StagBold = loadFont("StagBold.vlw");
     StagSans = loadFont("StagSans.vlw");
 
+    isPlaying = false;
+
     roundAmt = 20;
-    tempImgLoc = "./img/_na.jpg";
+    tempImgLoc = "/Users/macklinu/git/MusicTimeline/data/exam1/img/_na.jpg";
   }
 
   void setArtist(String s) {
@@ -38,18 +55,24 @@ class MusicObject {
   }
 
   void setAlbumArt(String imgName) {
-    if (imgName.length() > 0) {
-      finalImgLoc = "./img/" + imgName;
-    }
-    else {
-      finalImgLoc = tempImgLoc;
-    }
+    if (imgName.length() > 0) finalImgLoc = "/Users/macklinu/git/MusicTimeline/data/exam1/img/" + imgName;
+    else finalImgLoc = tempImgLoc;
     PImage tempImg = loadImage(finalImgLoc);
     albumArt = roundImageCorners(tempImg, roundAmt);
   }
-  
+
   void setSongFile(String s) {
-    songFile = s;
+    if (s.length() > 0) {
+      hasSong = true; 
+      songFile = "/Users/macklinu/git/MusicTimeline/data/exam1/mp3/" + s;
+      song = minim.loadFile(songFile);
+      trackLength = float(song.getMetaData().length());
+    }
+    else hasSong = false;
+  }
+
+  void setIsPlaying(boolean b) {
+    isPlaying = b;
   }
 
   // =======================
@@ -73,30 +96,108 @@ class MusicObject {
   String getInfo() {
     return info;
   }
-  
+
   String getSongFile() {
-   return songFile; 
+    return songFile;
   }
 
   PImage displayAlbumArt() {
     return albumArt;
   }
 
+  boolean hasSong() {
+    return hasSong;
+  }
+
+  float getTrackLength() {
+    return trackLength;
+  }
+
+  float getPosition() {
+    return song.position();
+  }
+
+  boolean getIsPlaying() {
+    return isPlaying;
+  }
+
+  boolean songIsPlaying() {
+    return song.isPlaying();
+  }
+
   // =======================
 
-  void drawPopUp() {
+  void drawPopUp(float x, float y) {
+    xPos = x;
+    yPos = y;
+    drawBackgroundBox();
+    drawAlbumArt();
+    drawText();
+  }
+
+  private void drawBackgroundBox() {
+    rectMode(CENTER);
     noStroke();
     fill(240);
-    rect(width/2, height/2, 400, 175, 10);
-    image(albumArt, width/2 - 100, height/2, 150, 150);
+    rect(xPos, yPos, 450, 175, 10);
+  }
+
+  private void drawAlbumArt() {
+    image(albumArt, xPos - 135, yPos, 150, 150);
+  }
+
+  private void drawText() {
     fill(0);
     textFont(StagBold, 14);
-    text(artist, width/2, height/2 - 70);
+    text(artist, xPos - 35, yPos - 70);
     textFont(StagBook, 12);
-    text('"' + title + '"', width/2, height/2 - 55);
-    text(year, width/2, height/2 - 40);
-    textAlign(LEFT);
-    text(info, width/2 + 100, height/2 + 160, width/2 - 200, height/2 - 20);
+    text('"' + title + '"', xPos - 35, yPos - 55);
+    text(year, xPos - 35, yPos - 40);
+    rectMode(CORNERS);
+    text(info, xPos - 35, yPos - 30, xPos + 220, yPos + 100);
+  }
+
+  private void drawArc() {
+    noFill();
+    strokeWeight(3);
+    stroke(41, 134, 203, 200);
+    arc(xPos - 135, yPos, 60, 60, radians(0) - OFFSET, radians(359.9999 * arcPosition) - OFFSET);
+  }
+
+  void drawPlayButton() {
+    if (!isPlaying) {
+      noStroke();
+      fill(240, 240, 240, 220);
+      ellipse(xPos - 135, yPos, 60, 60);
+      fill(0, 0, 0, 180);
+      triangle(xPos - 143, yPos - 15, xPos - 143, yPos + 15, xPos - 120, yPos);
+      drawArc();
+    }
+    if (isPlaying) {
+      arcPosition = song.position() / trackLength;
+      noStroke();
+      fill(240, 240, 240, 220);
+      ellipse(xPos - 135, yPos, 60, 60);
+      fill(0, 0, 0, 180);
+      rectMode(CENTER);
+      rect(xPos - 135, yPos, 25, 25, 0);
+      drawArc();
+    }
+  }
+
+  void playSong() {
+    isPlaying = !isPlaying;
+    if (isPlaying) song.play();
+    if (!isPlaying) song.pause();
+  }
+
+  void stopSong() {
+    isPlaying = false;
+    song.pause();
+  }
+
+  void rewindSong() {
+    song.rewind();
   }
 
   // =======================
@@ -129,6 +230,11 @@ class MusicObject {
       }
     }
     return rounded;
+  }
+
+  void stop() {
+    song.pause();
+    song.close();
   }
 }
 
