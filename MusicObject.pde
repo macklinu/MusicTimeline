@@ -2,10 +2,10 @@ class MusicObject {
 
   int yOFFSET;
 
-  AudioPlayer song;
+  AudioPlayer song; // hey there!
   AudioMetaData meta;
-  TextArea screenText;
 
+  String ID;
   String artist;
   String title;
   String year;
@@ -32,10 +32,6 @@ class MusicObject {
   PFont RobotoBlack, RobotoBold, RobotoCondensed, RobotoMedium, RobotoThin, RobotoItalic;
 
   MusicObject() {
-    screenText = new TextArea("", 23, 45, 1);
-
-
-
     yOFFSET = 25;
 
     RobotoBlack = loadFont("RobotoBlack.vlw");
@@ -56,8 +52,8 @@ class MusicObject {
     updatePlayerPositionVariables = true;
   }
 
-  void setAlbumArt(String imgName) {
-    if (imgName.length() > 0) finalImgLoc = "/Users/macklinu/git/MusicTimeline/data/" + EXAM_NUMBER + "/img/" + imgName;
+  void setAlbumArt(String s) {
+    if (s.length() > 0) finalImgLoc = "/Users/macklinu/git/MusicTimeline/data/" + EXAM_NUMBER + "/img/" + s + ".jpg";
     else finalImgLoc = tempImgLoc;
     PImage tempImg = loadImage(finalImgLoc);
     albumArt = tempImg;
@@ -67,7 +63,7 @@ class MusicObject {
   void setSongFile(String s) {
     if (s.length() > 0) {
       hasSong = true; 
-      songFile = "/Users/macklinu/git/MusicTimeline/data/" + EXAM_NUMBER + "/mp3/" + s;
+      songFile = "/Users/macklinu/git/MusicTimeline/data/" + EXAM_NUMBER + "/mp3/" + s + ".mp3";
       song = minim.loadFile(songFile);
       trackLength = float(song.getMetaData().length());
     }
@@ -108,10 +104,6 @@ class MusicObject {
     return albumArt;
   }
 
-  boolean hasSong() {
-    return hasSong;
-  }
-
   float getTrackLength() {
     return trackLength;
   }
@@ -130,9 +122,17 @@ class MusicObject {
 
   // =======================
 
-  void mouseEvents(float x, float y) {
-    if (dist(x, y, xPos - boxWidth/2 + 10, yPos + boxHeight/2 + 8) < 5) {
+  void mouseClick(int x, int y) {
+    if (dist(x, y, xPos - boxWidth/2 + 10, yPos + boxHeight/2 + 12) < 5) {
       playSong();
+    }
+  }
+
+  void mouseHold(int x, int y) {
+    if (x >= lineStartPos && x <= lineEndPos) {
+      if (abs(y - (yPos + boxHeight/2 + 8 + 5)) <= 7) {
+        song.cue((int)map(x, lineStartPos, lineEndPos, 0, trackLength-1));
+      }
     }
   }
 
@@ -189,8 +189,6 @@ class MusicObject {
       line(xPos - boxWidth/2 + 19, yPos + boxHeight/2 + 3 + 5, xPos - boxWidth/2 + 19, yPos + boxHeight/2 + 13 + 5);
       drawPlayerPosition();
     }
-    else {
-    }
   }
 
   private void drawPlayerPosition() {
@@ -208,6 +206,7 @@ class MusicObject {
     noStroke();
     fill(41, 134, 203, 180);
     ellipse(buttonStartPos + (arcPosition * lineLength), yPos + boxHeight/2 + 8 + 5, 10, 10);
+    if (song.position() == trackLength) rewindSong();
   }
 
   void playSong() {
@@ -226,10 +225,9 @@ class MusicObject {
   }
 
   void rewindSong() {
+    song.pause();
     song.rewind();
-  }
-
-  void skipPosition() {
+    arcPosition = 0;
   }
 
   // =======================

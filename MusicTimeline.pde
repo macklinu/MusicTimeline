@@ -5,8 +5,8 @@ import ddf.minim.analysis.*;
 import ddf.minim.ugens.*;
 import ddf.minim.effects.*;
 
-import java.awt.TextArea;
-import java.awt.event.*;
+Minim minim;
+PFont font;
 
 String EXAM_NUMBER = "exam2";
 
@@ -16,34 +16,28 @@ int rowCount = Data.getRowCount();
 MusicObject[] MO = new MusicObject[rowCount];
 
 boolean play = true;
+boolean mainScreen = false;
 
 int a = 0;
 int b = 0;
-
-Minim minim;
+int cur;
 
 void setup() {
-
-  addMouseWheelListener(new MouseWheelListener() {
-    public void mouseWheelMoved(MouseWheelEvent mwe) {
-      mouseWheel(mwe.getWheelRotation());
-    }
-  }
-  );
-
   minim = new Minim(this);
+  font = loadFont("RobotoThin.vlw");
 
   for (int i = 0; i < rowCount; i++) {
     MO[i] = new MusicObject();
   }
 
   for (int i = 0; i < rowCount; i++) {
-    MO[i].artist = Data.getString(i, 0);
-    MO[i].title = Data.getString(i, 1);
-    MO[i].year = Data.getString(i, 2);
-    MO[i].info = Data.getString(i, 3);
-    MO[i].setAlbumArt(Data.getString(i, 4));
-    MO[i].setSongFile(Data.getString(i, 5));
+    MO[i].ID = Data.getString(i, 0);
+    MO[i].artist = Data.getString(i, 1);
+    MO[i].title = Data.getString(i, 2);
+    MO[i].year = Data.getString(i, 3);
+    MO[i].info = Data.getString(i, 4);
+    MO[i].setAlbumArt(Data.getString(i, 0));
+    MO[i].setSongFile(Data.getString(i, 0));
   }
 
   size(600, 400);
@@ -58,6 +52,13 @@ void setup() {
 
 void draw() {
   background(0);
+  fill(255, 200);
+  textAlign(LEFT);
+  text("Detroit: The Birthplace of Techno", 10, 15);
+  text("Exam 2", 10, 30);
+  text("11/19/2012", 10, 45);
+  fill(255, 100);
+  text(str(a+1) + " of " + rowCount, 10, 60);
   MO[a].drawPopUp(width/2, height/2);
   if (MO[a].isPlaying == true && MO[a].songIsPlaying() == false) {
     MO[a].isPlaying = false;
@@ -66,17 +67,50 @@ void draw() {
   for (int i = 0; i < MO.length; i++) {
     if (MO[i].hasSong) {
       if (MO[i].songIsPlaying()) {
-        println(MO[i].artist + " - " + MO[i].title); 
+        fill(255, 100);
+        textAlign(LEFT);
+        text(MO[i].artist + " - " + MO[i].title + " (" + MO[i].year + ")", 10, height - 10);
       }
+    }
+  }
+
+  if (mousePressed) MO[a].mouseHold(mouseX, mouseY);
+
+  if (keyPressed) {
+    if (key == 'h') {
+      rectMode(CORNERS);
+      fill(240, 235);
+      rect(width/2 - 450/2, height/2 - 175/2, width/2 + 450/2, (height/2 + 175/2) + 25);
     }
   }
 }
 
 void keyPressed() {
-  //  if (key == ' ') {
-  //    save(a + "_" + b + ".png"); 
-  //    b++;
-  //  }
+  if (key == 's') {
+    if (!mainScreen) mainScreen = true;
+  }
+  if (keyCode == ENTER) {
+    for (int i = 0; i < MO.length; i++) {
+      if (MO[i].hasSong) {
+        if (MO[i].songIsPlaying()) {
+          MO[cur].rewindSong();
+          if (cur == a) MO[a].playSong();
+        }
+      }
+    }
+  }
+  if (key == ' ') {
+    for (int i = 0; i < MO.length; i++) {
+      if (MO[i].hasSong) {
+        if (MO[i].songIsPlaying()) {
+          MO[cur].playSong();
+          if (cur == a) MO[a].playSong();
+        }
+      }
+    }
+    MO[a].playSong();
+    cur = a;
+  }
   if (keyCode == RIGHT) {
     a++;
     a = constrain(a, 0, rowCount - 1);
@@ -88,13 +122,8 @@ void keyPressed() {
 }
 
 void mousePressed() {
-  MO[a].mouseEvents(mouseX, mouseY);
+  MO[a].mouseClick(mouseX, mouseY);
 }
-
-void mouseWheel(int i) {
-  println("mouse has moved by " + i + " units.");
-}
-
 
 void stop() {
   for (int i = 0; i < MO.length; i++) {
@@ -103,4 +132,3 @@ void stop() {
   minim.stop();
   super.stop();
 }
-
