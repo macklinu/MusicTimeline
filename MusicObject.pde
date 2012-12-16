@@ -19,6 +19,8 @@ class MusicObject {
   float arcPosition;
   int roundAmt;
   float xPos, yPos;
+  float xA, yA;
+  int sizeA;
 
   boolean active;
   boolean hasSong;
@@ -31,7 +33,7 @@ class MusicObject {
 
   PFont RobotoBlack, RobotoBold, RobotoCondensed, RobotoMedium, RobotoThin, RobotoItalic;
 
-  MusicObject() {
+  MusicObject() {    
     yOFFSET = 25;
 
     RobotoBlack = loadFont("RobotoBlack.vlw");
@@ -50,6 +52,8 @@ class MusicObject {
     boxHeight = 175;
 
     updatePlayerPositionVariables = true;
+    
+    active = false;
   }
 
   void setAlbumArt(String s) {
@@ -121,6 +125,13 @@ class MusicObject {
   }
 
   // =======================
+  
+  void drawArtArray(float tempX, float tempY, int tempSize) {
+    xA = tempX;
+    yA = tempY;
+    sizeA = tempSize;
+    image(albumArt, xA, yA, sizeA, sizeA);
+  }
 
   void mouseClick(int x, int y) {
     if (dist(x, y, xPos - boxWidth/2 + 10, yPos + boxHeight/2 + 12) < 5) {
@@ -231,36 +242,6 @@ class MusicObject {
   }
 
   // =======================
-
-  // borrowed from http://processing.org/discourse/beta/num_1201879926.html  
-  private PImage roundImageCorners(PImage img, int radius) {
-
-    PImage rounded = createImage(img.height, img.width, ARGB);
-
-    for (int i=0; i<img.width; i++) {
-      for (int j=0; j<img.height; j++) {
-
-        float d;
-
-        if (i < radius && j < radius )
-          d = dist(i, j, radius, radius);
-        else if (i > img.width - radius - 1 && j < radius )
-          d = dist(i+1, j, img.width-radius, radius);
-        else if ( i<radius && j>img.height-radius-1 )
-          d = dist(i, j+1, radius, img.height-radius);
-        else if ( i>img.width-radius-1 && j>img.height-radius-1 )
-          d = dist(i+1, j+1, img.width-radius, img.height-radius);
-        else
-          d = 0;
-
-        color pixel = img.pixels[i + img.width*j];
-        float opacity = constrain(255*(1+radius-d), 0, 255);
-        opacity = min( alpha(pixel), opacity ); // preserve the transparency of the original image.
-        rounded.pixels[i + img.width*j] = color( red(pixel), green(pixel), blue(pixel), opacity );
-      }
-    }
-    return rounded;
-  }
 
   void stop() {
     song.pause();

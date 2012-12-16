@@ -6,7 +6,7 @@ import ddf.minim.ugens.*;
 import ddf.minim.effects.*;
 
 Minim minim;
-PFont font;
+PFont font, bold;
 
 String EXAM_NUMBER = "exam2";
 
@@ -21,10 +21,15 @@ boolean mainScreen = false;
 int a = 0;
 int b = 0;
 int cur;
+color bgColor = color(30);
+
+int artSize = 50;
+
 
 void setup() {
   minim = new Minim(this);
   font = loadFont("RobotoThin.vlw");
+  bold = loadFont("RobotoBold.vlw");
 
   for (int i = 0; i < rowCount; i++) {
     MO[i] = new MusicObject();
@@ -40,26 +45,35 @@ void setup() {
     MO[i].setSongFile(Data.getString(i, 0));
   }
 
-  size(600, 400);
+  size(1000, 400);
   smooth(4);
 
   rectMode(CENTER);
   imageMode(CENTER);
   ellipseMode(CENTER);
-
-  //  println(int(MO[rowCount - 1].getYear()) - int(MO[0].getYear()));
 }
 
 void draw() {
-  background(0);
+  background(bgColor);
   fill(255, 200);
   textAlign(LEFT);
+  textFont(font, 12);
   text("Detroit: The Birthplace of Techno", 10, 15);
   text("Exam 2", 10, 30);
-  text("11/19/2012", 10, 45);
+  text("Hold 'h' for help", 10, 45);
   fill(255, 100);
   text(str(a+1) + " of " + rowCount, 10, 60);
-  MO[a].drawPopUp(width/2, height/2);
+  for (int i = 0; i < MO.length; i++) {
+    MO[i].drawArtArray((i * artSize) + artSize/2, height-artSize*1.5, artSize);
+  }
+
+  // draw white box around the active track
+  noFill();
+  stroke(255, 175);
+  strokeWeight(5);
+  rectMode(CENTER);
+  rect(MO[a].xA, MO[a].yA, artSize, artSize);
+
   if (MO[a].isPlaying == true && MO[a].songIsPlaying() == false) {
     MO[a].isPlaying = false;
     MO[a].rewindSong();
@@ -69,6 +83,7 @@ void draw() {
       if (MO[i].songIsPlaying()) {
         fill(255, 100);
         textAlign(LEFT);
+        textFont(font, 12);
         text(MO[i].artist + " - " + MO[i].title + " (" + MO[i].year + ")", 10, height - 10);
       }
     }
@@ -76,18 +91,32 @@ void draw() {
 
   if (mousePressed) MO[a].mouseHold(mouseX, mouseY);
 
+  MO[a].drawPopUp(width/2, height/2 - 50);
+
   if (keyPressed) {
-    if (key == 'h') {
-      rectMode(CORNERS);
+    if (key == 'h' || key == 'H') {
+      rectMode(CENTER);
       fill(240, 235);
-      rect(width/2 - 450/2, height/2 - 175/2, width/2 + 450/2, (height/2 + 175/2) + 25);
+      rect(width/2, height/2 - 50 + 15, MO[a].boxWidth, MO[a].boxHeight+ 20);
+      fill(0);
+      textFont(bold, 14);
+      textAlign(CENTER);
+      text("How to use", MO[a].xPos, MO[a].yPos-MO[a].boxHeight/2 + textAscent() + 5);
+      textFont(font, 12);
+      textAlign(LEFT);
+      text("SPACEBAR -- Play/Pause current track", MO[a].xPos-MO[a].boxWidth/2 + 5, MO[a].yPos-MO[a].boxHeight/2 + textAscent() + 20);
+      text("ENTER -- Stop current track and return to 0:00", MO[a].xPos-MO[a].boxWidth/2 + 5, MO[a].yPos-MO[a].boxHeight/2 + textAscent() + 35);
+      text("LEFT/RIGHT ARROW KEYS -- Switch between tracks", MO[a].xPos-MO[a].boxWidth/2 + 5, MO[a].yPos-MO[a].boxHeight/2 + textAscent() + 50);
+      text("Clicking the small album art photos on the bottom will also select a different track", MO[a].xPos-MO[a].boxWidth/2 + 5, MO[a].yPos-MO[a].boxHeight/2 + textAscent() + 65);
+      text("h -- Show help menu", MO[a].xPos-MO[a].boxWidth/2 + 5, MO[a].yPos-MO[a].boxHeight/2 + textAscent() + 80);
     }
   }
 }
 
+
 void keyPressed() {
   if (key == 's') {
-    if (!mainScreen) mainScreen = true;
+    // save("example.png");
   }
   if (keyCode == ENTER) {
     for (int i = 0; i < MO.length; i++) {
@@ -123,6 +152,9 @@ void keyPressed() {
 
 void mousePressed() {
   MO[a].mouseClick(mouseX, mouseY);
+  for (int i = 0; i < MO.length; i++) {
+    if (dist(mouseX, mouseY, MO[i].xA, MO[i].yA) < MO[i].sizeA/2) a = i;
+  }
 }
 
 void stop() {
@@ -132,3 +164,4 @@ void stop() {
   minim.stop();
   super.stop();
 }
+

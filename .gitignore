@@ -2,6 +2,9 @@
 
 screenshots/
 
+application.*/
+AndroidManifest.xml
+
 *.jpg
 *.png
 
